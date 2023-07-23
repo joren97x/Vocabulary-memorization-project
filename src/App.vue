@@ -6,8 +6,8 @@
 
 <template>
     <v-app>
-        <v-main>
-	        <v-container class="text-center align-self-center align-center mt-5" style="background-color: rgb(232, 255, 206);">
+        <v-main style="background-color: rgb(243,244,248);">
+	        <v-container class="text-center align-self-center align-center mt-5" style="background-color: white;">
                 <RouterView />
             </v-container>
         </v-main>

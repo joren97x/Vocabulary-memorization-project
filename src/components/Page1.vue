@@ -50,7 +50,7 @@
 		</v-row>
 		<v-row class="justify-center">
 				<v-btn color="green" id="page2btn" class="my-3" :disabled="!nativeLang && !languages.length <= 1">
-					<router-link to="/page2" class="router-link" style="text-decoration: none; color: black">
+					<router-link :to="{path: '/page2', query: { nativeLang: nativeLang, languages: languages.join(',') }}" class="router-link" style="text-decoration: none; color: black">
 						Let's make a list of vocabulary
 					</router-link>
 				</v-btn>

@@ -13,7 +13,11 @@ const router = createRouter({
         },
         {
             path: '/page2',
-            component: Page2
+            component: Page2,
+            props: (route) => ({
+                nativeLang: route.query.nativeLang,
+                languages: route.query.languages.split(',')
+            })
         }
         // {
         //     path: '/test',
