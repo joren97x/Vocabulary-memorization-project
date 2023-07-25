@@ -1,7 +1,5 @@
 <script setup>
 
-    import HelloWorld from './components/Page1.vue'
-
 </script>
 
 <template>

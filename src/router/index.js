@@ -1,8 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import Page1 from '../components/Page1.vue'
 import Page2 from '../components/Page2.vue'
-// import Test from '../components/Test.vue'
-
 
 const router = createRouter({
     history: createWebHistory(),
@@ -18,11 +16,7 @@ const router = createRouter({
                 nativeLang: route.query.nativeLang,
                 languages: route.query.languages.split(',')
             })
-        }
-        // {
-        //     path: '/test',
-        //     component: Test
-        // }
+        },
     ]
 })
 
