@@ -6,10 +6,13 @@
     const newWord = ref([])
     const words = ref([])
     let index = ref(0)
+    const tempAnswer = ref([])
     const answer = ref([])
     const quizIndex = ref(0)
     const showQuiz = ref(false)
+    const showResults = ref(false)
     const snackbar = ref(false)
+    const showMakeVocabulary = ref(true)
     const newLanguages = languages.filter(lang => {
         return lang != languages[nativeLang-1]
     })
@@ -62,38 +65,43 @@
         })
     }
 
-    const answerRules = [
-        value => {
-            if(value) return true
-            return 'Fill in missing field'
-        }
-    ]
+    function showQuizFn() {
+        showQuiz.value = true
+        showMakeVocabulary.value = false
+    }
 
     function validateForm() {
         for(let i = 0; i < newLanguages.length; i++) {
-            if(answer[i] === null || answer[i] === '') {
+            if(tempAnswer.value[i] === undefined) {
                 snackbar.value = true
+                console.log('mali beh')
                 return false
             }
         }
-        
+        answer.value.push({...tempAnswer.value})
+        tempAnswer.value = []
+        if(quizIndex.value < words.value.length) {
+            quizIndex.value++
+        }
+        if(quizIndex.value === words.value.length) {
+            showResults.value = true
+            showQuiz.value = false
+        }
     }
 
-
-
-    // watch(quizIndex.value, () => {
-    //     for(let i = 0; i < words[quizIndex].texts.length; i++) {
-
-    //     }
-    // })
-
-
+    watch(quizIndex, () => {
+        console.log('hello')
+        // if(quizIndex.value >= words.length) {
+        //     showQuiz.value = false
+        //     showResults.value = true
+        // }
+    })
 
 </script>
 
 <template>
 
-        <v-container v-if="!showQuiz">
+        <v-container v-if="showMakeVocabulary">
             <v-row>
             <v-col>
                 <h3>Make Volcabulary with Translation </h3>
@@ -146,23 +154,15 @@
 
             <v-row class="my-5">
                 <v-col>
-                    <v-btn color="green" :disabled="words.length < 2" @click="showQuiz = true">
+                    <v-btn color="green" :disabled="words.length < 2" @click="showQuizFn()">
                             Start Test
                     </v-btn>
                 </v-col>
             </v-row>
-
-            <v-snackbar v-model="snackbar" timeout="1000" color="warning">
-                    <v-alert
-                        density="compact"
-                        type="warning"
-                        title="Fill in missing fields."
-                        text="Bruh you stupid?"
-                    ></v-alert>
-            </v-snackbar>
+            
         </v-container>
-
-        <v-container v-if="showQuiz">
+        
+        <v-container v-if="showQuiz && quizIndex < words.length">
             <v-row>
                 <v-col>
                     <h2 class="text-h4">Quiz {{ words }} </h2>
@@ -172,6 +172,7 @@
                 <v-col>
                     Given 5 questions. You have to translate native language word into another language.
                     {{ answer }}
+                    {{ tempAnswer }}
                 </v-col>
             </v-row>
             <v-row class="justify-center">
@@ -193,10 +194,10 @@
                     <p class="text-h6">Translate this "{{ words[quizIndex].native }}" word of your native language {{ languages[nativeLang-1] }}, into the following languages:</p>
                 </v-col>
             </v-row>
-            <v-form validate-on="submit lazy" @submit.prevent>
+            <v-form @submit.prevent>
                 <v-row class="justify-center">
                     <v-col cols="7" v-for="(quiz, i) in words[quizIndex].texts" :key="i">
-                        <v-text-field :label="`In ${newLanguages[i]}`" :rules="answerRules" v-model="answer[i]">
+                        <v-text-field :label="`In ${newLanguages[i]}`" v-model="tempAnswer[i]">
                             <template v-slot:prepend>
                                 <v-card width="44" flat color="green-lighten-2" class="d-flex align-center justify-center fill-height">
                                     <h3>{{ quizIndex+1 }}</h3>
@@ -211,10 +212,85 @@
                 <v-row class="mb-3">
                     <v-spacer></v-spacer>
                     <v-col>
-                        <v-btn append-icon="mdi-chevron-right" color="green" type="submit" @click="validateForm">Next</v-btn>
+                        <v-btn append-icon="mdi-chevron-right" color="green"  @click="validateForm()">{{ quizIndex == words.length-1 ? 'Submit' : 'Next' }}</v-btn>
                     </v-col>
                 </v-row>
             </v-form>
         </v-container>
 
+        <v-container v-show="showResults">
+            <v-row>
+                <v-col>
+                    <p class="text-h6">Quiz Result</p>
+                    <p>40% Percentage</p>
+                    <span> <label>2 Right</label> <label>3 Wrong</label></span>
+                </v-col>
+                
+            </v-row>
+            <h5>
+                    {{ 'quiz index ' + quizIndex }}
+                    {{ 'quiz length ' + words.length }}
+                    {{ words }}
+                    {{ answer }}
+                </h5>
+            <v-row>
+                <v-col cols="8" style="margin-left: 20%;" id="result-container">
+                    <v-table id="table">
+                        <thead>
+                            <tr>
+                                <th class="text-center" rowspan="2">No</th>
+                                <th class="text-center">{{ languages[nativeLang-1] }}</th>
+                                <th class="text-center" colspan="2" v-for="lang in newLanguages" :key="lang">{{ lang }}</th>
+                                <th class="text-center" rowspan="2">Result</th>
+                            </tr>
+                            <tr>
+                                <th class="text-center">Native</th>
+                                <template v-for="lang in newLanguages" :key="lang">
+                                    <th class="text-center">Translation</th>
+                                    <th class="text-center">Answer</th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <template v-for="(word, i) in words" :key="word">
+                                <tr>
+                                    <td rowspan="2">{{word.id+1}}</td>
+                                    <td rowspan="2">{{ word.native }}</td>
+                                    <!-- <td v-for="w in word.texts" :key="w">{{ w }}</td> -->
+                                    <template v-for="(str, j) in word.texts" :key="str">
+                                        <td>{{ str[j] }}</td>
+                                        <td>{{ answer[i] }}</td>
+                                    </template>
+                                    <td rowspan="2"> <v-icon>mdi-check</v-icon> </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"> <v-icon>mdi-check</v-icon> </td>
+                                    <td colspan="2"> <v-icon>mdi-check</v-icon> </td>
+                                </tr>
+                            </template>
+                            
+                        </tbody>
+                    </v-table>
+                </v-col>
+            </v-row>
+        </v-container>
+
+        <v-snackbar v-model="snackbar" timeout="1000" color="warning">
+            <v-alert
+                density="compact"
+                type="warning"
+                title="Fill in missing fields."
+                text="Bruh you stupid?"
+            ></v-alert>
+        </v-snackbar>
+
 </template>
+
+<style scoped>
+
+    #result-container #table, #result-container th, #result-container td {
+        border: 1px solid grey;
+    }
+
+</style>
