@@ -13,6 +13,7 @@
     const showResults = ref(false)
     const snackbar = ref(false)
     const showMakeVocabulary = ref(true)
+    const checkAnswer = ref([])
     const newLanguages = languages.filter(lang => {
         return lang != languages[nativeLang-1]
     })
@@ -89,12 +90,20 @@
         }
     }
 
-    watch(quizIndex, () => {
-        console.log('hello')
-        // if(quizIndex.value >= words.length) {
-        //     showQuiz.value = false
-        //     showResults.value = true
-        // }
+    watch(showResults, () => {
+        if(showResults) {
+            for(let i = 0; i < words.value.length; i++) {
+                console.log(`outer loop = ${i} and inner loop ${i}`)
+                for(let j = 0; j < words.value.length; j++) {
+                    if(words.value[i].texts[j] === answer.value[i][`${j}`]){
+                        checkAnswer.value.push('mdi-check')
+                    }
+                    else {
+                        checkAnswer.value.push('mdi-close')
+                    }
+                }
+            }
+        }
     })
 
 </script>
@@ -218,7 +227,7 @@
             </v-form>
         </v-container>
 
-        <v-container v-show="showResults">
+        <v-container v-if="showResults">
             <v-row>
                 <v-col>
                     <p class="text-h6">Quiz Result</p>
@@ -235,6 +244,7 @@
                 </h5>
             <v-row>
                 <v-col cols="8" style="margin-left: 20%;" id="result-container">
+                    {{ checkAnswer }}
                     <v-table id="table">
                         <thead>
                             <tr>
@@ -244,7 +254,7 @@
                                 <th class="text-center" rowspan="2">Result</th>
                             </tr>
                             <tr>
-                                <th class="text-center">Native</th>
+                                <th class="text-center">Native </th>
                                 <template v-for="lang in newLanguages" :key="lang">
                                     <th class="text-center">Translation</th>
                                     <th class="text-center">Answer</th>
@@ -258,15 +268,16 @@
                                     <td rowspan="2">{{word.id+1}}</td>
                                     <td rowspan="2">{{ word.native }}</td>
                                     <!-- <td v-for="w in word.texts" :key="w">{{ w }}</td> -->
-                                    <template v-for="(str, j) in word.texts" :key="str">
-                                        <td>{{ str[j] }}</td>
-                                        <td>{{ answer[i] }}</td>
+                                    <template v-for="(w, j) in word.texts" :key="w">
+                                        <td>{{ w }}</td>
+                                        <td>{{ answer[i][`${j}`] }}</td>
                                     </template>
                                     <td rowspan="2"> <v-icon>mdi-check</v-icon> </td>
-                                </tr>
+                                </tr>   
                                 <tr>
-                                    <td colspan="2"> <v-icon>mdi-check</v-icon> </td>
-                                    <td colspan="2"> <v-icon>mdi-check</v-icon> </td>
+                                    <template v-for="result in newLanguages" :key="result">
+                                        <td colspan="2"> <v-icon>mdi-check</v-icon> </td>
+                                    </template>
                                 </tr>
                             </template>
                             
